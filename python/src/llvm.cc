@@ -137,6 +137,8 @@ createTargetMachine(llvm::Module *module, std::string proc,
   opt.TrapUnreachable = true;
   opt.MCOptions.AsmVerbose = true;
   opt.MCOptions.PreserveAsmComments = true;
+  if (mlir::triton::tools::getBoolEnv("TRITON_USE_AMDGCNLIB"))
+    opt.VecLib = llvm::VectorLibrary::AMDGCNLIB;
   std::unique_ptr<llvm::TargetMachine> machine{target->createTargetMachine(
       module->getTargetTriple(), proc, features, opt, llvm::Reloc::PIC_,
       std::nullopt,
@@ -709,6 +711,14 @@ void init_triton_llvm(py::module &&m) {
         if (!arch.empty() && pluginFile.empty())
           targetMachine =
               createTargetMachine(mod, arch, enable_fp_fusion, features);
+        if (targetMachine &&
+            mlir::triton::tools::getBoolEnv("TRITON_USE_AMDGCNLIB")) {
+          TargetLibraryInfoImpl TLII(targetMachine->getTargetTriple(),
+                                     targetMachine->Options.VecLib);
+          fam.registerPass([TLII = std::move(TLII)] {
+            return TargetLibraryAnalysis(TLII);
+          });
+        }
         PassBuilder pb(/*targetMachine=*/targetMachine.get(), tuningOptions,
                        std::nullopt, instrCbPtr);
 
