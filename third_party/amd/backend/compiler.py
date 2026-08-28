@@ -460,6 +460,10 @@ class HIPBackend(BaseBackend):
         if options.waves_per_eu != 0:
             kernel_fn.add_fn_attr("amdgpu-waves-per-eu", f"{options.waves_per_eu},{options.waves_per_eu}")
 
+        # Workaround, remove once the LLVM fix lands
+        # With this set, waves_per_eu >= 2 uses no AGPRs; waves_per_eu = 1 stills gets 256.
+        kernel_fn.add_fn_attr("amdgpu-agpr-alloc", "0")
+
         if is_coexec_scheduler_enabled(options.arch) and options.num_warps <= 4:
             kernel_fn.add_fn_attr("amdgpu-sched-strategy", "coexec")
 
