@@ -759,9 +759,9 @@ void init_triton_llvm(py::module_ &m) {
         }
         using namespace llvm;
 
-        std::optional<ScopedLLVMOption<bool>> unrollRuntimeGuard;
+        std::optional<ScopedLLVMOption<bool>> unrollRuntimeLocalGuard;
         if (disable_runtime_unroll)
-          unrollRuntimeGuard.emplace("unroll-runtime", false);
+          unrollRuntimeLocalGuard.emplace("amdgpu-unroll-runtime-local", false);
 
         LoopAnalysisManager lam;
         FunctionAnalysisManager fam;

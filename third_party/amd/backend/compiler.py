@@ -511,7 +511,8 @@ class HIPBackend(BaseBackend):
 
         llvm.optimize_module(llvm_mod, llvm.OPTIMIZE_O3, options.arch, '', [], options.enable_fp_fusion,
                              disable_vector_combine=True,
-                             disable_runtime_unroll=options.arch in ["gfx942", "gfx950"])
+                             disable_runtime_unroll=options.arch in ["gfx942", "gfx950"]
+                             and options.waves_per_eu > 2)
 
         # Architectures with architected SGPRs store the workgroup id in ttmp9 (X) and ttmp7 (Y[15:0], Z[31:16]).
         # These attributes are used to determine if Z should be masked out when loading Y. They are inferred during
